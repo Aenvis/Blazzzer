@@ -10,6 +10,7 @@ namespace Blazzzer.ApiService.Endpoints
 		{
 			app.MapGet("/jobs", async (IJobService jobService) =>
 			{
+				return Results.Ok("hello");
 			});
 
 			app.MapGet("/jobs/{id}", async (IJobService jobService, [FromQuery] int id) =>
@@ -18,7 +19,14 @@ namespace Blazzzer.ApiService.Endpoints
 
 			app.MapPost("/jobs", async (IJobService jobService, [FromBody] JobRequest job) =>
 			{
-			});
+				var result = await jobService.AddJobAsync(job);
+
+				if (result.IsFailed)
+					return Results.BadRequest(result.Errors);
+
+				return Results.Created($"/jobs/{result.Value}", job);
+			})
+			.WithName("PostJob");
 		}
 	}
 }
